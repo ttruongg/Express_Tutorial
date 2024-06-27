@@ -1,5 +1,6 @@
-import express from "express";
-
+import express, { request } from "express";
+import { query, validationResult, body, matchedData, checkSchema } from "express-validator";
+import { createUserValidationSchema } from "./utils/ValidationSchema.js";
 const app = express();
 
 const PORT = process.env.PORT || 8080;
@@ -55,27 +56,46 @@ const mockUsers = [
 // [GET] /
 
 // [GET] /api/users
-app.get("/api/users", loggingMiddleware, (req, res) => {
-  console.log(req.query);
+app.get(
+  "/api/users",
+  query("filter")
+    .isString()
+    .notEmpty()
+    .withMessage("Must not be empty")
+    .isLength({ min: 3, max: 10 })
+    .withMessage("Must be at least 3-30 characters"),
+  (req, res) => {
+    const result = validationResult(req);
+    console.log(result);
+    const { filter, value } = req.query;
 
-  const { filter, value } = req.query;
+    if (filter && value) {
+      return res.send(mockUsers.filter((user) => user[filter].includes(value)));
+    }
 
-  if (filter && value) {
-    return res.send(mockUsers.filter((user) => user[filter].includes(value)));
+    return res.send(mockUsers);
   }
-
-  return res.send(mockUsers);
-});
+);
 
 // [POST] /api/users
-app.post("/api/users", (req, res) => {
-  const { body } = req;
+app.post(
+  "/api/users",
+  checkSchema(createUserValidationSchema),
+  (req, res) => {
+    const result = validationResult(req);
 
-  const newUser = { id: mockUsers[mockUsers.length - 1].id + 1, ...body };
-  mockUsers.push(newUser);
-  console.log(mockUsers);
-  return res.status(201).send(newUser);
-});
+    if (!result.isEmpty()) {
+      return res.status(400).send({ errors: result.array() });
+    }
+
+    const data = matchedData(req);
+
+   // const { body } = req;
+    const newUser = { id: mockUsers[mockUsers.length - 1].id + 1, ...data };
+    mockUsers.push(newUser);
+    return res.status(201).send(newUser);
+  }
+);
 
 // [PUT] /api/users/:id
 app.put("/api/users/:id", resolveIndexByUserId, (req, res) => {
@@ -87,10 +107,7 @@ app.put("/api/users/:id", resolveIndexByUserId, (req, res) => {
 });
 // [PATCH] /api/users/:id
 app.patch("/api/users/:id", resolveIndexByUserId, (req, res) => {
-  const {
-    body,
-    findUserIndex,
-  } = req;
+  const { body, findUserIndex } = req;
 
   mockUsers[findUserIndex] = { ...mockUsers[findUserIndex], ...body };
   return res.sendStatus(200);
