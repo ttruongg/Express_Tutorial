@@ -20,8 +20,17 @@ router.get(
     .isLength({ min: 3, max: 10 })
     .withMessage("Must be at least 3-30 characters"),
   (req, res) => {
+    console.log(req.session.id);
+    req.sessionStore.get(req.session.id, (err, sessionData) => {
+      if (err) {
+        console.log(err);
+        throw err;
+      }
+      console.log(sessionData);
+    });
+    req.session.visited = true;
     const result = validationResult(req);
-    
+
     const { filter, value } = req.query;
 
     if (filter && value) {
@@ -32,20 +41,24 @@ router.get(
   }
 );
 // [POST] /api/users
-router.post("/api/users", checkSchema(createUserValidationSchema), (req, res) => {
-  const result = validationResult(req);
-  console.log(result);
+router.post(
+  "/api/users",
+  checkSchema(createUserValidationSchema),
+  (req, res) => {
+    const result = validationResult(req);
+    console.log(result);
 
-  if (!result.isEmpty()) {
-    return res.status(400).send({ errors: result.array() });
+    if (!result.isEmpty()) {
+      return res.status(400).send({ errors: result.array() });
+    }
+
+    const data = matchedData(req);
+
+    const newUser = { id: mockUsers[mockUsers.length - 1].id + 1, ...data };
+    mockUsers.push(newUser);
+    return res.status(201).send(newUser);
   }
-
-  const data = matchedData(req);
-
-  const newUser = { id: mockUsers[mockUsers.length - 1].id + 1, ...data };
-  mockUsers.push(newUser);
-  return res.status(201).send(newUser);
-});
+);
 
 // [PUT] /api/users/:id
 router.put("/api/users/:id", resolveIndexByUserId, (req, res) => {
