@@ -1,7 +1,7 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import session from "express-session";
-import routes from "./routes/index.js";
+import routes from "./src/routes/index.js";
 const app = express();
 
 const PORT = process.env.PORT || 8080;
