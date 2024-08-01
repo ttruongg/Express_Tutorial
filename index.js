@@ -4,15 +4,20 @@ import session from "express-session";
 import passport from "passport";
 import routes from "./src/routes/index.js";
 import "./src/strategies/local-strategy.js";
+import "dotenv/config";
+import mongoose from "mongoose";
+
 
 const app = express();
 
-const PORT = process.env.PORT || 8080;
+//const PORT = process.env.PORT || 8080;
+const { PORT, KEY_SESSION } = process.env;
+
 app.use(express.json());
 app.use(cookieParser("helloworld"));
 app.use(
   session({
-    secret: "learn expressjs",
+    secret: KEY_SESSION,
     saveUninitialized: false,
     resave: false,
     cookie: {
@@ -28,6 +33,10 @@ app.use(routes);
 app.listen(PORT, () => {
   console.log("Server is running at port: " + PORT);
 });
+
+mongoose.connect("mongodb://localhost:27017/expressjs_tutorial")
+  .then(() => console.log("Connected to Database!"))
+  .catch((err) => { console.log(`Error: ${err}`) });
 
 app.get("/", (req, res) => {
   console.log(req.session);
