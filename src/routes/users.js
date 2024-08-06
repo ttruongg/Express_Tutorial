@@ -8,7 +8,8 @@ import {
 } from "express-validator";
 import { createUserValidationSchema } from "../utils/ValidationSchema.js";
 import { resolveIndexByUserId } from "../utils/middleware.js";
-import { User } from "../model/user.js"
+import { User } from "../model/user.js";
+import { hashPassword } from "../utils/helper.js";
 const router = Router();
 
 // [GET] /api/users
@@ -48,8 +49,9 @@ router.post("/api/users",
     const result = validationResult(req);
     if (!result.isEmpty()) return res.status(400).send(result.array());
     const data = matchedData(req);
-    console.log(data);
+    data.password = hashPassword(data.password);
     const newUser = new User(data);
+
     try {
       const saveUser = await newUser.save();
       return res.status(201).send(saveUser);
