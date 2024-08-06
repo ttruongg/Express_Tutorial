@@ -34,7 +34,10 @@ app.listen(PORT, () => {
   console.log("Server is running at port: " + PORT);
 });
 
-mongoose.connect("mongodb://localhost:27017/expressjs_tutorial")
+mongoose.connect("mongodb://localhost:27017/expressjs_tutorial", {
+  useUnifiedTopology: true,
+  useNewUrlParser: true
+})
   .then(() => console.log("Connected to Database!"))
   .catch((err) => { console.log(`Error: ${err}`) });
 
@@ -66,7 +69,11 @@ app.post("/api/auth", passport.authenticate("local"), (req, res) => {
 
 app.get("/api/auth/status", (req, res) => {
   console.log(req.session);
-  return req.user ? res.sendStatus(200).send(req.user) : res.sendStatus(401);
+  if (req.user) {
+    res.status(200).json(req.user);
+  } else {
+    res.sendStatus(401);
+  }
 });
 
 app.post("/api/auth/logout", (req, res) => {
