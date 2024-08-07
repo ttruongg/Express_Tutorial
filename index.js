@@ -6,7 +6,7 @@ import routes from "./src/routes/index.js";
 import "./src/strategies/local-strategy.js";
 import "dotenv/config";
 import mongoose from "mongoose";
-
+import MongoStore from "connect-mongo";
 
 const app = express();
 
@@ -15,6 +15,12 @@ const { PORT, KEY_SESSION } = process.env;
 
 app.use(express.json());
 app.use(cookieParser("helloworld"));
+mongoose.connect("mongodb://localhost:27017/expressjs_tutorial", {
+  useUnifiedTopology: true,
+  useNewUrlParser: true
+})
+  .then(() => console.log("Connected to Database!"))
+  .catch((err) => { console.log(`Error: ${err}`) });
 app.use(
   session({
     secret: KEY_SESSION,
@@ -23,6 +29,9 @@ app.use(
     cookie: {
       maxAge: 60000 * 60,
     },
+    store: MongoStore.create({
+      client: mongoose.connection.getClient()
+    })
   })
 );
 app.use(passport.initialize());
@@ -34,12 +43,7 @@ app.listen(PORT, () => {
   console.log("Server is running at port: " + PORT);
 });
 
-mongoose.connect("mongodb://localhost:27017/expressjs_tutorial", {
-  useUnifiedTopology: true,
-  useNewUrlParser: true
-})
-  .then(() => console.log("Connected to Database!"))
-  .catch((err) => { console.log(`Error: ${err}`) });
+
 
 app.get("/", (req, res) => {
   console.log(req.session);
@@ -69,6 +73,7 @@ app.post("/api/auth", passport.authenticate("local"), (req, res) => {
 
 app.get("/api/auth/status", (req, res) => {
   console.log(req.session);
+  console.log(req.sessionID);
   if (req.user) {
     res.status(200).json(req.user);
   } else {
