@@ -3,11 +3,11 @@ import cookieParser from "cookie-parser";
 import session from "express-session";
 import passport from "passport";
 import routes from "./src/routes/index.js";
-import "./src/strategies/local-strategy.js";
+//import "./src/strategies/local-strategy.js";
 import "dotenv/config";
 import mongoose from "mongoose";
 import MongoStore from "connect-mongo";
-
+import "./src/strategies/discrod-strategy.js";
 const app = express();
 
 //const PORT = process.env.PORT || 8080;
@@ -71,7 +71,17 @@ app.post("/api/auth", passport.authenticate("local"), (req, res) => {
 //   return res.status(200).send(findUser);
 // });
 
+app.get("/api/auth/discord", passport.authenticate('discord'));
+app.get(
+  "/api/auth/discord/redirect",
+  passport.authenticate('discord'),
+  (req, res) => {
+    res.sendStatus(200);
+
+  })
+
 app.get("/api/auth/status", (req, res) => {
+  console.log(req.user);
   console.log(req.session);
   console.log(req.sessionID);
   if (req.user) {
