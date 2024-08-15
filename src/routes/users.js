@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { mockUsers } from "../utils/constant.js";
+import { mockUsers } from "../utils/constant.js"
 import {
   query,
   validationResult,
@@ -87,18 +87,15 @@ router.delete("/api/users/:id", resolveIndexByUserId, (req, res) => {
 });
 
 //[GET] /api/users/:id
-router.get("/api/users/:id", (req, res) => {
-  console.log(req.params);
-  const parseId = parseInt(req.params.id);
+router.get("/api/users/:id", resolveIndexByUserId, (req, res) => {
+  const { findUserIndex } = req;
+  const user = mockUsers[findUserIndex];
 
-  if (isNaN(parseId)) res.status(400).send("Bad request. Invalid ID");
-
-  const user = mockUsers.find((user) => user.id === parseId);
   if (!user) {
     return res.status(404).send("User not found! ");
   }
 
-  res.send(user);
+  return res.send(user);
 });
 
 export default router;
