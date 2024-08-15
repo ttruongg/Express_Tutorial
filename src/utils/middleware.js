@@ -1,3 +1,4 @@
+import { mockUsers } from "./constant.js";
 export const resolveIndexByUserId = (req, res, next) => {
   const {
     params: { id },
