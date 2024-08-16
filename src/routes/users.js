@@ -10,6 +10,8 @@ import { createUserValidationSchema } from "../utils/ValidationSchema.js";
 import { resolveIndexByUserId } from "../utils/middleware.js";
 import { User } from "../model/user.js";
 import { hashPassword } from "../utils/helper.js";
+import "../controller/user.js";
+import { getUserById } from "../controller/user.js";
 const router = Router();
 
 // [GET] /api/users
@@ -87,15 +89,6 @@ router.delete("/api/users/:id", resolveIndexByUserId, (req, res) => {
 });
 
 //[GET] /api/users/:id
-router.get("/api/users/:id", resolveIndexByUserId, (req, res) => {
-  const { findUserIndex } = req;
-  const user = mockUsers[findUserIndex];
-
-  if (!user) {
-    return res.status(404).send("User not found! ");
-  }
-
-  return res.send(user);
-});
+router.get("/api/users/:id", resolveIndexByUserId, getUserById);
 
 export default router;
