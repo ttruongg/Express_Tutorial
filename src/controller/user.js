@@ -5,7 +5,7 @@ export function getUserById(request, response) {
     const user = mockUsers[findUserIndex];
 
     if (!user) {
-        return response.status(404).send("User not found! ");
+        return response.sendStatus(404);
     }
 
     return response.send(user);
