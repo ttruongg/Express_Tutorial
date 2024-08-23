@@ -10,7 +10,6 @@ import MongoStore from "connect-mongo";
 import "./src/strategies/discrod-strategy.js";
 const app = express();
 
-//const PORT = process.env.PORT || 8080;
 const { PORT, KEY_SESSION } = process.env;
 
 app.use(express.json());

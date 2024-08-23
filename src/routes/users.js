@@ -3,15 +3,12 @@ import { mockUsers } from "../utils/constant.js"
 import {
   query,
   validationResult,
-  matchedData,
   checkSchema,
 } from "express-validator";
 import { createUserValidationSchema } from "../utils/ValidationSchema.js";
 import { resolveIndexByUserId } from "../utils/middleware.js";
-import { User } from "../model/user.js";
-import { hashPassword } from "../utils/helper.js";
 import "../controller/user.js";
-import { getUserById } from "../controller/user.js";
+import { createUser, getUserById } from "../controller/user.js";
 const router = Router();
 
 // [GET] /api/users
@@ -45,23 +42,7 @@ router.get(
   }
 );
 // [POST] /api/users
-router.post("/api/users",
-  checkSchema(createUserValidationSchema),
-  async (req, res) => {
-    const result = validationResult(req);
-    if (!result.isEmpty()) return res.status(400).send(result.array());
-    const data = matchedData(req);
-    data.password = hashPassword(data.password);
-    const newUser = new User(data);
-
-    try {
-      const saveUser = await newUser.save();
-      return res.status(201).send(saveUser);
-    } catch (error) {
-      console.log(error);
-      return res.sendStatus(400);
-    }
-  });
+router.post("/api/users", checkSchema(createUserValidationSchema), createUser);
 
 // [PUT] /api/users/:id
 router.put("/api/users/:id", resolveIndexByUserId, (req, res) => {
